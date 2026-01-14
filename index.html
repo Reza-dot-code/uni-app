@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProduktionsAssistent AI | Industrie 4.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg-900: #0a0f14;
+            --bg-800: #111821;
+            --bg-700: #1a232e;
+            --bg-600: #243040;
+            --bg-500: #2d3d52;
+            --text-100: #c4d1df;
+            --text-300: #6b8299;
+            --text-400: #4a5d75;
+            --accent: #22d3ee;
+            --red: #ef4444;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --purple: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-900);
+            color: var(--text-100);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-800);
+            border-right: 1px solid var(--bg-600);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .sidebar.hidden {
+            margin-left: -320px;
+        }
+        
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--bg-600);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), #0891b2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+        }
+        
+        .sidebar-title {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 11px;
+            color: var(--text-400);
+        }
+        
+        .search-box {
+            padding: 16px;
+            border-bottom: 1px solid var(--bg-600);
+        }
+        
+        .search-input {
+            width: 100%;
+            background: var(--bg-700);
+            border: 1px solid var(--bg-600);
+            border-radius: 8px;
+            padding: 10px 12px 10px 36px;
+            color: var(--text-100);
+            font-size: 13px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+        
+        .search-input::placeholder {
+            color: var(--text-400);
+        }
+        
+        .search-wrapper {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+        
+        .categories {
+            padding: 16px;
+            border-bottom: 1px solid var(--bg-600);
+        }
+        
+        .section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-400);
+            margin-bottom: 12px;
+        }
+        
+        .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .category-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-700);
+            color: var(--text-300);
+        }
+        
+        .category-btn:hover {
+            background: var(--bg-600);
+        }
+        
+        .category-btn.active {
+            background: var(--accent);
+            color: var(--bg-900);
+        }
+        
+        .category-btn.cat-sicherheit.active { background: rgba(239,68,68,0.2); color: var(--red); border-color: var(--red); }
+        .category-btn.cat-maschine.active { background: rgba(59,130,246,0.2); color: var(--blue); border-color: var(--blue); }
+        .category-btn.cat-qualitaet.active { background: rgba(16,185,129,0.2); color: var(--green); border-color: var(--green); }
+        .category-btn.cat-logistik.active { background: rgba(245,158,11,0.2); color: var(--amber); border-color: var(--amber); }
+        .category-btn.cat-wartung.active { background: rgba(139,92,246,0.2); color: var(--purple); border-color: var(--purple); }
+        
+        .guides-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .guides-list::-webkit-scrollbar { width: 6px; }
+        .guides-list::-webkit-scrollbar-track { background: var(--bg-800); }
+        .guides-list::-webkit-scrollbar-thumb { background: var(--bg-500); border-radius: 3px; }
+        
+        .guide-card {
+            padding: 12px;
+            background: var(--bg-700);
+            border: 1px solid var(--bg-600);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .guide-card:hover {
+            border-color: var(--bg-500);
+            transform: translateX(4px);
+        }
+        
+        .guide-card.active {
+            border-color: var(--accent);
+            background: rgba(34, 211, 238, 0.1);
+        }
+        
+        .guide-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .guide-icon {
+            font-size: 20px;
+        }
+        
+        .guide-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .guide-title {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .guide-desc {
+            font-size: 11px;
+            color: var(--text-400);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .guide-meta {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .guide-tag {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg-600);
+            color: var(--text-300);
+        }
+        
+        .guide-tag.cat-sicherheit { background: rgba(239,68,68,0.2); color: var(--red); }
+        .guide-tag.cat-maschine { background: rgba(59,130,246,0.2); color: var(--blue); }
+        .guide-tag.cat-qualitaet { background: rgba(16,185,129,0.2); color: var(--green); }
+        .guide-tag.cat-logistik { background: rgba(245,158,11,0.2); color: var(--amber); }
+        .guide-tag.cat-wartung { background: rgba(139,92,246,0.2); color: var(--purple); }
+        
+        .fav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+        }
+        
+        /* MAIN AREA */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .main-header {
+            height: 56px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--bg-600);
+            background: var(--bg-800);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-300);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .toggle-btn:hover {
+            background: var(--bg-700);
+        }
+        
+        .header-title {
+            font-size: 13px;
+            color: var(--text-300);
+        }
+        
+        .clear-btn {
+            background: none;
+            border: none;
+            color: var(--text-400);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .clear-btn:hover {
+            background: var(--bg-700);
+            color: var(--text-100);
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        /* CHAT */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            scroll-behavior: smooth;
+        }
+        
+        .messages::-webkit-scrollbar { width: 6px; }
+        .messages::-webkit-scrollbar-track { background: var(--bg-900); }
+        .messages::-webkit-scrollbar-thumb { background: var(--bg-500); border-radius: 3px; }
+        
+        .message {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .message.bot .message-avatar {
+            background: var(--bg-600);
+        }
+        
+        .message.user .message-avatar {
+            background: rgba(34, 211, 238, 0.3);
+        }
+        
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .message.bot .message-content {
+            background: linear-gradient(135deg, var(--bg-700), var(--bg-800));
+            border: 1px solid var(--bg-600);
+            border-top-left-radius: 4px;
+        }
+        
+        .message.user .message-content {
+            background: rgba(34, 211, 238, 0.2);
+            border-top-right-radius: 4px;
+        }
+        
+        .message-content strong {
+            color: var(--accent);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 6px;
+            padding: 12px 16px;
+            background: var(--bg-700);
+            border-radius: 16px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+        
+        .input-area {
+            padding: 16px;
+            border-top: 1px solid var(--bg-600);
+            background: var(--bg-800);
+        }
+        
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: var(--bg-700);
+            border: 1px solid var(--bg-600);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-100);
+            font-size: 13px;
+            outline: none;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--accent);
+        }
+        
+        .chat-input::placeholder {
+            color: var(--text-400);
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, var(--accent), #0891b2);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: var(--bg-900);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .send-btn:hover {
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .shortcuts-hint {
+            text-align: center;
+            font-size: 10px;
+            color: var(--text-400);
+            margin-top: 8px;
+        }
+        
+        /* CHECKLIST PANEL */
+        .checklist-panel {
+            width: 380px;
+            border-left: 1px solid var(--bg-600);
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-800);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .checklist-panel.hidden {
+            display: none;
+        }
+        
+        .checklist-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--bg-600);
+        }
+        
+        .checklist-header.cat-sicherheit { background: rgba(239,68,68,0.1); }
+        .checklist-header.cat-maschine { background: rgba(59,130,246,0.1); }
+        .checklist-header.cat-qualitaet { background: rgba(16,185,129,0.1); }
+        .checklist-header.cat-logistik { background: rgba(245,158,11,0.1); }
+        .checklist-header.cat-wartung { background: rgba(139,92,246,0.1); }
+        
+        .checklist-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .checklist-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-300);
+        }
+        
+        .progress-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--bg-600);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-label {
+            color: var(--text-400);
+        }
+        
+        .progress-value {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-700);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .steps-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .step-item {
+            padding: 12px;
+            background: var(--bg-700);
+            border: 1px solid var(--bg-600);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .step-item:hover {
+            border-color: var(--bg-500);
+        }
+        
+        .step-item.checked {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .step-item.critical {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        
+        .step-header {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--bg-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .step-item.checked .step-number {
+            background: var(--green);
+            color: white;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-text {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .step-item.checked .step-text {
+            color: var(--green);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .step-critical-badge {
+            color: var(--red);
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .step-details {
+            font-size: 11px;
+            color: var(--text-400);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+        
+        .completion-banner {
+            padding: 16px;
+            background: rgba(16, 185, 129, 0.2);
+            border-top: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--green);
+            font-weight: 600;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* TOAST */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            padding: 12px 20px;
+            background: var(--bg-600);
+            border-radius: 8px;
+            margin-top: 8px;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .toast.success {
+            background: rgba(16, 185, 129, 0.9);
+        }
+        
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🏭</div>
+                <div>
+                    <div class="sidebar-title">ProduktionsAssistent</div>
+                    <div class="sidebar-subtitle">● AI Integrated</div>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Guide suchen...">
+                </div>
+            </div>
+            
+            <div class="categories">
+                <div class="section-title">Kategorien</div>
+                <div class="category-buttons" id="categoryButtons">
+                    <button class="category-btn active" data-category="all">Alle</button>
+                    <button class="category-btn cat-sicherheit" data-category="sicherheit">🛡️ Sicherheit</button>
+                    <button class="category-btn cat-maschine" data-category="maschine">⚙️ Maschine</button>
+                    <button class="category-btn cat-qualitaet" data-category="qualitaet">✅ Qualität</button>
+                    <button class="category-btn cat-logistik" data-category="logistik">📦 Logistik</button>
+                    <button class="category-btn cat-wartung" data-category="wartung">🔧 Wartung</button>
+                </div>
+            </div>
+            
+            <div class="guides-list" id="guidesList"></div>
+        </aside>
+        
+        <!-- MAIN -->
+        <main class="main">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="toggle-btn" id="toggleSidebar">◀</button>
+                    <span class="header-title" id="headerTitle">Chat</span>
+                </div>
+                <button class="clear-btn" id="clearChat">🗑️ Reset</button>
+            </header>
+            
+            <div class="content-area">
+                <div class="chat-area">
+                    <div class="messages" id="messages"></div>
+                    
+                    <div class="input-area">
+                        <div class="input-wrapper">
+                            <input type="text" class="chat-input" id="chatInput" placeholder="Frag mich etwas... (z.B. 'Welche Temperatur für Öl?', 'Start CNC')">
+                            <button class="send-btn" id="sendBtn">Senden</button>
+                        </div>
+                        <div class="shortcuts-hint">Ctrl+L = Reset | Ctrl+B = Sidebar</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-panel hidden" id="checklistPanel"></div>
+            </div>
+        </main>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================
+        // 1. DATENBANK 
+        // ============================================
+        const guides = {
+            'not-aus': {
+                id: 'not-aus', title: 'NOT-AUS Prozedur', category: 'sicherheit', icon: '🚨',
+                estimatedTime: '2-3 Min', description: 'Sofortmaßnahmen bei Gefahrensituationen',
+                keywords: ['not-aus', 'notaus', 'notstopp', 'emergency', 'stopp', 'gefahr', 'unfall', 'notfall'],
+                steps: [
+                    { id: 1, text: 'NOT-AUS-Taster drücken (roter Pilztaster)', details: 'Der NOT-AUS befindet sich an jeder Maschinenstation. Fester Druck bis zum Einrasten.', critical: true },
+                    { id: 2, text: 'Gefahrenbereich räumen', details: 'Alle Personen mindestens 2 Meter von der Maschine entfernen.', critical: true },
+                    { id: 3, text: 'Schichtleiter informieren', details: 'Telefon: 2222 (intern) oder Funk Kanal 3.', critical: false },
+                    { id: 4, text: 'Unfallstelle absichern', details: 'Warnband oder Pylonen aufstellen.', critical: false },
+                    { id: 5, text: 'Dokumentation ausfüllen', details: 'NOT-AUS-Protokoll im QM-System innerhalb von 30 Minuten.', critical: false },
+                    { id: 6, text: 'Wiederanlauf nur nach Freigabe', details: 'Freigabe durch Schichtleiter + Sicherheitsbeauftragten erforderlich.', critical: true }
+                ]
+            },
+            'erste-hilfe': {
+                id: 'erste-hilfe', title: 'Erste Hilfe Maßnahmen', category: 'sicherheit', icon: '🏥',
+                estimatedTime: '5-10 Min', description: 'Erstversorgung bei Arbeitsunfällen',
+                keywords: ['erste hilfe', 'verletzung', 'unfall', 'wunde', 'blutung', 'notarzt'],
+                steps: [
+                    { id: 1, text: 'Eigenschutz beachten', details: 'Handschuhe anlegen, Gefahrenquelle beseitigen.', critical: true },
+                    { id: 2, text: 'Notruf absetzen: 112', details: 'Wer? Was? Wo? Wie viele?', critical: true },
+                    { id: 3, text: 'Ersthelfer alarmieren', details: 'Ersthelfer-Liste am Schwarzen Brett.', critical: false },
+                    { id: 4, text: 'Erste-Hilfe-Kasten holen', details: 'Standorte: Eingang Halle, Pausenraum, CNC-Station.', critical: false },
+                    { id: 5, text: 'Wundversorgung durchführen', details: 'Sterile Kompressen, Druckverband bei Blutung.', critical: false },
+                    { id: 6, text: 'Verletzte Person betreuen', details: 'Ansprechen, beruhigen, nicht alleine lassen.', critical: true }
+                ]
+            },
+            'psa': {
+                id: 'psa', title: 'PSA-Kontrolle & Anlegen', category: 'sicherheit', icon: '🦺',
+                estimatedTime: '3-5 Min', description: 'Persönliche Schutzausrüstung prüfen',
+                keywords: ['psa', 'schutzausrüstung', 'helm', 'brille', 'handschuhe', 'sicherheitsschuhe'],
+                steps: [
+                    { id: 1, text: 'Sicherheitsschuhe prüfen', details: 'S3-Schuhe mit Stahlkappe.', critical: true },
+                    { id: 2, text: 'Schutzbrille aufsetzen', details: 'Bei spanenden Arbeiten Pflicht.', critical: true },
+                    { id: 3, text: 'Gehörschutz anlegen', details: 'Ab 85 dB(A) Pflicht.', critical: false },
+                    { id: 4, text: 'Arbeitshandschuhe wählen', details: 'Schnittschutz Level 5 für Blech.', critical: false },
+                    { id: 5, text: 'Arbeitskleidung kontrollieren', details: 'Eng anliegend, kein Schmuck.', critical: true }
+                ]
+            },
+            'cnc-start': {
+                id: 'cnc-start', title: 'CNC-Maschine Hochfahren', category: 'maschine', icon: '⚙️',
+                estimatedTime: '10-15 Min', description: 'Standardprozedur zum Starten der CNC',
+                keywords: ['cnc', 'start', 'hochfahren', 'einschalten', 'maschine starten', 'inbetriebnahme'],
+                steps: [
+                    { id: 1, text: 'Sichtprüfung der Maschine', details: 'Arbeitsraum frei? Späne entfernt?', critical: true },
+                    { id: 2, text: 'Hauptschalter einschalten', details: 'Warten bis "READY" erscheint (ca. 60 Sek).', critical: false },
+                    { id: 3, text: 'Kühlmittelstand prüfen', details: 'Mindestens 70% Füllstand.', critical: true },
+                    { id: 4, text: 'Referenzfahrt durchführen', details: 'Alle Achsen: X → Y → Z.', critical: true },
+                    { id: 5, text: 'Werkzeugmagazin kontrollieren', details: 'Verschleiß prüfen.', critical: false },
+                    { id: 6, text: 'Spannmittel prüfen', details: 'Spannkraft min. 40 kN.', critical: true },
+                    { id: 7, text: 'Testlauf im Leerlauf', details: 'Programm ohne Werkstück durchfahren.', critical: false },
+                    { id: 8, text: 'Freigabe dokumentieren', details: 'Maschinenbuch unterschreiben.', critical: false }
+                ]
+            },
+            'werkzeugwechsel': {
+                id: 'werkzeugwechsel', title: 'Werkzeugwechsel CNC', category: 'maschine', icon: '🔧',
+                estimatedTime: '5-8 Min', description: 'Sicherer Werkzeugwechsel',
+                keywords: ['werkzeug', 'wechsel', 'fräser', 'bohrer', 'wendeschneidplatte'],
+                steps: [
+                    { id: 1, text: 'Maschine in Sicherheitsposition', details: 'Spindel stoppen, M6-Position.', critical: true },
+                    { id: 2, text: 'Altes Werkzeug entnehmen', details: 'Spannzange lösen.', critical: false },
+                    { id: 3, text: 'Neues Werkzeug prüfen', details: 'Schneidkanten auf Ausbrüche.', critical: true },
+                    { id: 4, text: 'Werkzeug einsetzen', details: 'Schaft reinigen, auf Plananlage achten.', critical: false },
+                    { id: 5, text: 'Werkzeuglänge messen', details: 'Messtaster anfahren.', critical: true },
+                    { id: 6, text: 'Testschnitt durchführen', details: 'Erstes Teil messen.', critical: false }
+                ]
+            },
+            'programmoptimierung': {
+                id: 'programmoptimierung', title: 'CNC-Programm Optimierung', category: 'maschine', icon: '📊',
+                estimatedTime: '15-20 Min', description: 'Programme analysieren und optimieren',
+                keywords: ['programm', 'optimierung', 'geschwindigkeit', 'vorschub', 'schnittdaten'],
+                steps: [
+                    { id: 1, text: 'Zykluszeit analysieren', details: 'Vergleich mit Vorgabezeit.', critical: false },
+                    { id: 2, text: 'Eilgänge überprüfen', details: 'G0 auf kürzeste Wege.', critical: false },
+                    { id: 3, text: 'Schnittdaten anpassen', details: 'Laut Hersteller-Empfehlung.', critical: true },
+                    { id: 4, text: 'Werkzeugwege optimieren', details: 'Trochoidales Fräsen bei Nuten.', critical: false },
+                    { id: 5, text: 'Simulation durchführen', details: 'Kollisionsprüfung.', critical: true },
+                    { id: 6, text: 'Änderungen dokumentieren', details: 'Version erhöhen.', critical: true }
+                ]
+            },
+            'masskontrolle': {
+                id: 'masskontrolle', title: 'Maßkontrolle durchführen', category: 'qualitaet', icon: '📏',
+                estimatedTime: '5-10 Min', description: 'Werkstücke vermessen',
+                keywords: ['messen', 'masskontrolle', 'prüfen', 'toleranz', 'messschieber', 'mikrometer'],
+                steps: [
+                    { id: 1, text: 'Prüfplan bereitstellen', details: 'Zeichnung aus Arbeitsmappe.', critical: true },
+                    { id: 2, text: 'Messmittel auswählen', details: 'Messschieber ±0.02mm.', critical: false },
+                    { id: 3, text: 'Messmittel nullen', details: 'Reinigen, Nullpunkt setzen.', critical: true },
+                    { id: 4, text: 'Messungen durchführen', details: '3 Messungen, Mittelwert.', critical: true },
+                    { id: 5, text: 'Ergebnisse dokumentieren', details: 'SPC-Chart führen.', critical: true },
+                    { id: 6, text: 'Teil kennzeichnen', details: 'i.O. = grün, n.i.O. = rot.', critical: false }
+                ]
+            },
+            'fehleranalyse': {
+                id: 'fehleranalyse', title: 'Fehleranalyse & Korrektur', category: 'qualitaet', icon: '🔍',
+                estimatedTime: '15-30 Min', description: 'Systematische Fehlersuche',
+                keywords: ['fehler', 'analyse', 'problem', 'ausschuss', 'ursache', 'korrektur'],
+                steps: [
+                    { id: 1, text: 'Fehler identifizieren', details: 'Fehlerbild fotografieren.', critical: true },
+                    { id: 2, text: 'Betroffene Teile sperren', details: 'Rote Karte, Quarantäne.', critical: true },
+                    { id: 3, text: 'Fehlerursache ermitteln', details: '5-Why, Ishikawa.', critical: false },
+                    { id: 4, text: 'Sofortmaßnahme definieren', details: 'Stoppen? Nacharbeit?', critical: true },
+                    { id: 5, text: 'Korrekturmaßnahme umsetzen', details: 'Werkzeug/Programm anpassen.', critical: false },
+                    { id: 6, text: 'Wirksamkeit prüfen', details: '5 Teile 100% prüfen.', critical: true }
+                ]
+            },
+            'temperaturueberwachung': {
+                id: 'temperaturueberwachung', title: 'Temperaturüberwachung', category: 'qualitaet', icon: '🌡️',
+                estimatedTime: '5 Min', description: 'Prozesstemperaturen überwachen',
+                keywords: ['temperatur', 'überwachung', 'wärme', 'kühlung'],
+                steps: [
+                    { id: 1, text: 'Kühlmitteltemperatur prüfen', details: 'Sollwert: 18-22°C.', critical: true },
+                    { id: 2, text: 'Spindeltemperatur kontrollieren', details: 'Max. 45°C.', critical: true },
+                    { id: 3, text: 'Hydrauliköltemperatur', details: '35-50°C optimal.', critical: true },
+                    { id: 4, text: 'Abweichungen melden', details: 'Instandhaltung informieren.', critical: false }
+                ]
+            },
+            'materialmanagement': {
+                id: 'materialmanagement', title: 'Materialbereitstellung', category: 'logistik', icon: '📦',
+                estimatedTime: '10-15 Min', description: 'Material anfordern',
+                keywords: ['material', 'bereitstellung', 'lager', 'kanban', 'bestand'],
+                steps: [
+                    { id: 1, text: 'Materialbedarf ermitteln', details: 'Arbeitsplan prüfen.', critical: true },
+                    { id: 2, text: 'Lagerbestand prüfen', details: 'SAP MMBE.', critical: false },
+                    { id: 3, text: 'Material anfordern', details: 'Kanban-Karte ziehen.', critical: false },
+                    { id: 4, text: 'Material kontrollieren', details: 'Charge, Zertifikat prüfen.', critical: true },
+                    { id: 5, text: 'Entnahme buchen', details: 'SAP-Buchung.', critical: true }
+                ]
+            },
+            'verpackung': {
+                id: 'verpackung', title: 'Verpackung & Versand', category: 'logistik', icon: '📤',
+                estimatedTime: '10-15 Min', description: 'Fertigteile verpacken',
+                keywords: ['verpackung', 'versand', 'lieferung', 'transport', 'palette'],
+                steps: [
+                    { id: 1, text: 'Verpackungsvorschrift prüfen', details: 'Kundenspezifisch?', critical: true },
+                    { id: 2, text: 'Teile reinigen', details: 'Konservierung auftragen.', critical: false },
+                    { id: 3, text: 'Teile einlegen', details: 'Trennlagen, fixieren.', critical: true },
+                    { id: 4, text: 'Dokumentation beilegen', details: 'Lieferschein, Prüfzeugnis.', critical: true },
+                    { id: 5, text: 'Warenausgang buchen', details: 'SAP-Lieferschein.', critical: true }
+                ]
+            },
+            'schichtuebergabe': {
+                id: 'schichtuebergabe', title: 'Schichtübergabe', category: 'logistik', icon: '🔄',
+                estimatedTime: '10-15 Min', description: 'Informationsübergabe',
+                keywords: ['schicht', 'übergabe', 'schichtwechsel', 'ablösung', 'handover'],
+                steps: [
+                    { id: 1, text: 'Produktionsstand dokumentieren', details: 'Stückzahlen ins Schichtbuch.', critical: true },
+                    { id: 2, text: 'Qualitätsprobleme melden', details: 'Ausschussquote, gesperrte Teile.', critical: true },
+                    { id: 3, text: 'Maschinenstatus übergeben', details: 'Störungen, Wartungen.', critical: true },
+                    { id: 4, text: 'Besonderheiten besprechen', details: 'Eilaufträge, Prioritäten.', critical: false },
+                    { id: 5, text: 'Übergabeprotokoll unterschreiben', details: 'Beide Schichtleiter.', critical: true }
+                ]
+            },
+            'maschinenreinigung': {
+                id: 'maschinenreinigung', title: 'Maschinenreinigung', category: 'wartung', icon: '🧹',
+                estimatedTime: '20-30 Min', description: 'Tägliche Reinigung',
+                keywords: ['reinigung', 'sauber', 'putzen', 'späne', 'pflege'],
+                steps: [
+                    { id: 1, text: 'Maschine ausschalten', details: 'Hauptschalter OFF.', critical: true },
+                    { id: 2, text: 'Grobe Späne entfernen', details: 'Spänehaken verwenden!', critical: true },
+                    { id: 3, text: 'Arbeitsraum aussaugen', details: 'Industriesauger.', critical: false },
+                    { id: 4, text: 'Führungsbahnen abwischen', details: 'Öl-Lappen, kein Kühlmittel!', critical: true },
+                    { id: 5, text: 'Umgebung aufräumen', details: 'Werkzeuge zurücklegen.', critical: false }
+                ]
+            },
+            'wartungsplan': {
+                id: 'wartungsplan', title: 'Präventive Wartung', category: 'wartung', icon: '🛠️',
+                estimatedTime: '30-60 Min', description: 'Regelmäßige Wartung',
+                keywords: ['wartung', 'präventiv', 'inspektion', 'schmierung', 'filter'],
+                steps: [
+                    { id: 1, text: 'Wartungsplan prüfen', details: 'SAP PM.', critical: true },
+                    { id: 2, text: 'Ersatzteile bereitstellen', details: 'Filter, Öle holen.', critical: false },
+                    { id: 3, text: 'Maschine sichern', details: 'LOTO-Prozedur.', critical: true },
+                    { id: 4, text: 'Schmierung durchführen', details: 'Schmiernippel abschmieren.', critical: false },
+                    { id: 5, text: 'Verschleißteile prüfen', details: 'Riemen, Lager.', critical: true },
+                    { id: 6, text: 'Funktionstest', details: 'Alle Achsen testen.', critical: true },
+                    { id: 7, text: 'Wartung dokumentieren', details: 'SAP PM Rückmeldung.', critical: true }
+                ]
+            },
+            'stoerungsbehebung': {
+                id: 'stoerungsbehebung', title: 'Störungsbehebung', category: 'wartung', icon: '⚡',
+                estimatedTime: '15-45 Min', description: 'Störungen analysieren',
+                keywords: ['störung', 'fehler', 'alarm', 'beheben', 'reparatur', 'ausfall', 'error'],
+                steps: [
+                    { id: 1, text: 'Fehlermeldung notieren', details: 'Fehlercode abschreiben.', critical: true },
+                    { id: 2, text: 'Störungshistorie prüfen', details: 'Schon aufgetreten?', critical: false },
+                    { id: 3, text: 'Einfache Ursachen prüfen', details: 'Türkontakte, Druckluft.', critical: false },
+                    { id: 4, text: 'Reset versuchen', details: 'Fehler quittieren.', critical: false },
+                    { id: 5, text: 'Instandhaltung rufen', details: 'Tel. 3500.', critical: true },
+                    { id: 6, text: 'Stillstandszeit erfassen', details: 'MES-System buchen.', critical: true },
+                    { id: 7, text: 'Wiederanlauf begleiten', details: 'Erstes Teil 100% prüfen.', critical: true }
+                ]
+            }
+        };
+
+        const categories = {
+            sicherheit: { name: 'Sicherheit', icon: '🛡️' },
+            maschine: { name: 'Maschinenbedienung', icon: '⚙️' },
+            qualitaet: { name: 'Qualitätssicherung', icon: '✅' },
+            logistik: { name: 'Logistik', icon: '📦' },
+            wartung: { name: 'Wartung', icon: '🔧' }
+        };
+
+        // ============================================
+        // 2. STATE & NLP ENGINE
+        // ============================================
+        let state = {
+            currentGuide: null,
+            checkedSteps: {},
+            favorites: JSON.parse(localStorage.getItem('pa-favorites') || '[]'),
+            selectedCategory: 'all',
+            searchQuery: '',
+            isTyping: false,
+            sidebarVisible: true,
+            // Kontext-Gedächtnis
+            context: {
+                lastGuideId: null,
+                lastCategory: null,
+                lastTopic: null
+            }
+        };
+
+        // NLP: Levenshtein Distanz für Fuzzy Search
+        function levenshtein(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        // NLP: Tokenizer und Stopwords
+        function tokenize(text) {
+            const stopWords = ['wie', 'wo', 'wann', 'was', 'ich', 'der', 'die', 'das', 'ein', 'eine', 'und', 'oder', 'ist', 'sind', 'zu', 'mit', 'für', 'den'];
+            return text.toLowerCase()
+                .replace(/[.,?!]/g, '')
+                .split(/\s+/)
+                .filter(w => w.length > 2 && !stopWords.includes(w));
+        }
+
+        // ============================================
+        // 3. INTELLIGENTE SUCHE & ANTWORTEN
+        // ============================================
+
+        // Sucht nicht nur im Titel, sondern in Inhalten (Simuliert RAG)
+        function semanticSearch(query) {
+            const tokens = tokenize(query);
+            const results = [];
+
+            Object.values(guides).forEach(guide => {
+                let score = 0;
+                let matchReason = '';
+
+                // 1. Exakter Titel-Match (Stark)
+                if (guide.title.toLowerCase().includes(query.toLowerCase())) {
+                    score += 50;
+                    matchReason = 'Titel-Treffer';
+                }
+
+                // 2. Keyword Match mit Fuzzy Logic
+                tokens.forEach(token => {
+                    // Keywords prüfen
+                    guide.keywords.forEach(kw => {
+                        const dist = levenshtein(token, kw);
+                        const similarity = 1 - (dist / Math.max(token.length, kw.length));
+                        if (similarity > 0.8) {
+                            score += 20;
+                            matchReason = `Thema: ${kw}`;
+                        }
+                    });
+
+                    // 3. Inhalt (Steps & Details) durchsuchen (Deep Search)
+                    guide.steps.forEach(step => {
+                        if (step.text.toLowerCase().includes(token) || step.details.toLowerCase().includes(token)) {
+                            score += 10;
+                            if (!matchReason) matchReason = 'Inhaltstreffer';
+                        }
+                    });
+                });
+
+                if (score > 0) {
+                    results.push({ guide, score, reason: matchReason });
+                }
+            });
+
+            return results.sort((a, b) => b.score - a.score);
+        }
+
+        // Generiert "menschliche" Antworten basierend auf Kontext
+        function generateSmartResponse(input) {
+            const lower = input.toLowerCase();
+            const tokens = tokenize(input);
+
+            // 1. Smalltalk & Meta-Intents
+            if (['hallo', 'hi', 'moin'].some(t => lower.startsWith(t))) return { text: "Hallo! Ich bin bereit. Was steht an? Maschine, Wartung oder Sicherheit?", guide: null };
+            if (lower.includes('danke')) return { text: "Gerne! Weiter geht's. Noch Fragen?", guide: null };
+
+            // 2. Kontext-Check: Bezieht sich der User auf das Vorherige?
+            if ((lower.includes('starten') || lower.includes('los') || lower.includes('öffnen')) && state.context.lastGuideId) {
+                // User sagt "Starte es" -> bezieht sich auf letzten Guide
+                const guide = guides[state.context.lastGuideId];
+                return {
+                    text: `Ich öffne die Checkliste für **${guide.title}** für dich.`,
+                    guide: guide
+                };
+            }
+
+            // 3. Semantische Suche
+            const matches = semanticSearch(input);
+
+            if (matches.length > 0) {
+                const topMatch = matches[0];
+                const guide = topMatch.guide;
+
+                // Kontext merken
+                state.context.lastGuideId = guide.id;
+                state.context.lastCategory = guide.category;
+
+                // Antwort-Strategie basierend auf Intent
+                
+                // Intent: Detailfrage (z.B. "Welche Temperatur?", "Wen anrufen?")
+                if (lower.includes('wer') || lower.includes('wie viel') || lower.includes('welche') || lower.includes('wo')) {
+                    // Suche den spezifischen Schritt
+                    const relevantStep = guide.steps.find(s => 
+                        tokens.some(t => s.text.toLowerCase().includes(t) || s.details.toLowerCase().includes(t))
+                    );
+
+                    if (relevantStep) {
+                        return {
+                            text: `In **${guide.title}** habe ich dazu folgendes gefunden:\n\n> "${relevantStep.text}"\n\n💡 Detail: ${relevantStep.details}\n\nSoll ich den ganzen Guide öffnen?`,
+                            guide: null // Guide nicht sofort öffnen, erst anbieten
+                        };
+                    }
+                }
+
+                // Intent: Allgemein / Starten
+                const confidence = topMatch.score;
+                let replyText = '';
+                
+                if (confidence > 40) {
+                    replyText = `Ich habe **${guide.title}** gefunden. Das passt am besten zu deiner Frage (${topMatch.reason}).\n\nMöchtest du die Checkliste durchgehen?`;
+                } else {
+                    replyText = `Meintest du vielleicht **${guide.title}**? Das habe ich unter "${topMatch.reason}" gefunden.`;
+                }
+
+                return { text: replyText, guide: guide };
+            }
+
+            // 4. Fallback: Kategorie-Suche
+            for (const [catId, cat] of Object.entries(categories)) {
+                if (lower.includes(cat.name.toLowerCase()) || lower.includes(catId)) {
+                    return {
+                        text: `In der Kategorie **${cat.name}** habe ich folgende Guides:\n\n${Object.values(guides).filter(g => g.category === catId).map(g => `• ${g.title}`).join('\n')}`,
+                        guide: null
+                    };
+                }
+            }
+
+            // 5. Keine Ahnung
+            return {
+                text: `Das habe ich leider nicht verstanden. Ich kenne mich mit Maschinen, Sicherheit und Wartung aus. Versuch es mit einem Stichwort wie "Ölstand" oder "Notaus".`,
+                guide: null
+            };
+        }
+
+        // ============================================
+        // 4. DOM & EVENT HANDLING
+        // ============================================
+        const sidebar = document.getElementById('sidebar');
+        const guidesList = document.getElementById('guidesList');
+        const messages = document.getElementById('messages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const searchInput = document.getElementById('searchInput');
+        const categoryButtons = document.getElementById('categoryButtons');
+        const checklistPanel = document.getElementById('checklistPanel');
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const clearChat = document.getElementById('clearChat');
+        const headerTitle = document.getElementById('headerTitle');
+        const toastContainer = document.getElementById('toastContainer');
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function renderGuides() {
+            const filtered = Object.values(guides).filter(g => {
+                const matchesCategory = state.selectedCategory === 'all' || g.category === state.selectedCategory;
+                const matchesSearch = !state.searchQuery || 
+                    g.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+                    g.keywords.some(k => k.includes(state.searchQuery.toLowerCase()));
+                return matchesCategory && matchesSearch;
+            });
+
+            guidesList.innerHTML = `
+                <div class="section-title">Guides (${filtered.length})</div>
+                ${filtered.map(g => {
+                    const progress = state.checkedSteps[g.id]?.length || 0;
+                    const isFav = state.favorites.includes(g.id);
+                    const isActive = state.currentGuide?.id === g.id;
+                    return `
+                        <div class="guide-card ${isActive ? 'active' : ''}" data-guide="${g.id}">
+                            <div class="guide-header">
+                                <span class="guide-icon">${g.icon}</span>
+                                <div class="guide-info">
+                                    <div class="guide-title">${g.title}</div>
+                                    <div class="guide-desc">${g.description}</div>
+                                    <div class="guide-meta">
+                                        <span class="guide-tag cat-${g.category}">${categories[g.category].name}</span>
+                                        ${progress > 0 ? `<span class="guide-tag">${progress}/${g.steps.length} ✓</span>` : ''}
+                                    </div>
+                                </div>
+                                <button class="fav-btn" data-fav="${g.id}">${isFav ? '⭐' : '☆'}</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+
+            guidesList.querySelectorAll('.guide-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('fav-btn')) selectGuide(card.dataset.guide);
+                });
+            });
+
+            guidesList.querySelectorAll('.fav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(btn.dataset.fav);
+                });
+            });
+        }
+
+        function toggleFavorite(id) {
+            if (state.favorites.includes(id)) {
+                state.favorites = state.favorites.filter(f => f !== id);
+                showToast('Entfernt', 'info');
+            } else {
+                state.favorites.push(id);
+                showToast('Favorit hinzugefügt', 'success');
+            }
+            localStorage.setItem('pa-favorites', JSON.stringify(state.favorites));
+            renderGuides();
+        }
+
+        function selectGuide(id) {
+            const guide = guides[id];
+            state.currentGuide = guide;
+            state.context.lastGuideId = guide.id; // Kontext aktualisieren
+            headerTitle.textContent = `${guide.icon} ${guide.title}`;
+            
+            // Bot Nachricht bei manuellem Klick
+            addMessage(`Ich habe **${guide.title}** für dich geöffnet.`, false);
+            
+            renderGuides();
+            renderChecklist();
+        }
+
+        function renderChecklist() {
+            if (!state.currentGuide) {
+                checklistPanel.classList.add('hidden');
+                return;
+            }
+
+            const guide = state.currentGuide;
+            const checked = state.checkedSteps[guide.id] || [];
+            const progress = Math.round((checked.length / guide.steps.length) * 100);
+
+            checklistPanel.classList.remove('hidden');
+            checklistPanel.innerHTML = `
+                <div class="checklist-header cat-${guide.category}">
+                    <div class="checklist-title">
+                        <span>${guide.icon}</span>
+                        <span>${guide.title}</span>
+                    </div>
+                    <div class="checklist-meta">
+                        <span class="guide-tag cat-${guide.category}">${categories[guide.category].name}</span>
+                        <span>⏱️ ${guide.estimatedTime}</span>
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-label">Fortschritt</span>
+                        <span class="progress-value">${progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                <div class="steps-list">
+                    ${guide.steps.map((step, i) => {
+                        const isChecked = checked.includes(step.id);
+                        return `
+                            <div class="step-item ${isChecked ? 'checked' : ''} ${step.critical && !isChecked ? 'critical' : ''}" data-step="${step.id}">
+                                <div class="step-header">
+                                    <div class="step-number">${isChecked ? '✓' : i + 1}</div>
+                                    <div class="step-content">
+                                        <div class="step-text">
+                                            ${step.text}
+                                            ${step.critical && !isChecked ? '<span class="step-critical-badge">● Kritisch</span>' : ''}
+                                        </div>
+                                        <div class="step-details">${step.details}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                ${progress === 100 ? '<div class="completion-banner">🎉 Guide abgeschlossen!</div>' : ''}
+            `;
+
+            checklistPanel.querySelectorAll('.step-item').forEach(item => {
+                item.addEventListener('click', () => toggleStep(parseInt(item.dataset.step)));
+            });
+        }
+
+        function toggleStep(stepId) {
+            const guideId = state.currentGuide.id;
+            if (!state.checkedSteps[guideId]) state.checkedSteps[guideId] = [];
+            
+            if (state.checkedSteps[guideId].includes(stepId)) {
+                state.checkedSteps[guideId] = state.checkedSteps[guideId].filter(s => s !== stepId);
+            } else {
+                state.checkedSteps[guideId].push(stepId);
+            }
+            
+            renderChecklist();
+            renderGuides();
+        }
+
+        function addMessage(text, isUser = false) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/> (.*)/g, '<blockquote style="border-left: 3px solid var(--accent); padding-left: 10px; margin: 5px 0; color: var(--text-300);">$1</blockquote>')
+                .replace(/\n/g, '<br>');
+            
+            div.innerHTML = `
+                <div class="message-avatar">${isUser ? '👤' : '🤖'}</div>
+                <div class="message-content">${formattedText}</div>
+            `;
+            
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function showTyping() {
+            state.isTyping = true;
+            const div = document.createElement('div');
+            div.className = 'typing-indicator';
+            div.id = 'typingIndicator';
+            div.innerHTML = `
+                <div class="message-avatar" style="background: var(--bg-600)">🤖</div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function hideTyping() {
+            state.isTyping = false;
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function handleSend() {
+            const text = chatInput.value.trim();
+            if (!text || state.isTyping) return;
+            
+            addMessage(text, true);
+            chatInput.value = '';
+            showTyping();
+            
+            const delay = 600 + Math.random() * 800;
+            
+            setTimeout(() => {
+                hideTyping();
+                const response = generateSmartResponse(text);
+                addMessage(response.text, false);
+                
+                if (response.guide) {
+                    state.currentGuide = response.guide;
+                    headerTitle.textContent = `${response.guide.icon} ${response.guide.title}`;
+                    renderGuides();
+                    renderChecklist();
+                }
+                
+                if (response.guide) {
+                    state.selectedCategory = response.guide.category;
+                    updateCategoryButtons();
+                    renderGuides();
+                }
+            }, delay);
+        }
+
+        function updateCategoryButtons() {
+            categoryButtons.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === state.selectedCategory) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function clearMessages() {
+            messages.innerHTML = '';
+            state.currentGuide = null;
+            state.checkedSteps = {};
+            state.context = { lastGuideId: null, lastCategory: null, lastTopic: null };
+            headerTitle.textContent = 'Chat';
+            checklistPanel.classList.add('hidden');
+            renderGuides();
+            addMessage(`Willkommen beim **ProduktionsAssistent AI**! 🏭\n\nIch bin jetzt schlauer. Frag mich nach Details wie "Wen muss ich bei Notaus anrufen?" oder "Start CNC".`, false);
+            showToast('Chat & Gedächtnis geleert', 'info');
+        }
+
+        // INIT LISTENERS
+        sendBtn.addEventListener('click', handleSend);
+        chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSend(); });
+        searchInput.addEventListener('input', (e) => { state.searchQuery = e.target.value; renderGuides(); });
+        categoryButtons.addEventListener('click', (e) => {
+            if (e.target.classList.contains('category-btn')) {
+                state.selectedCategory = e.target.dataset.category;
+                updateCategoryButtons();
+                renderGuides();
+            }
+        });
+        toggleSidebar.addEventListener('click', () => {
+            state.sidebarVisible = !state.sidebarVisible;
+            sidebar.classList.toggle('hidden', !state.sidebarVisible);
+            toggleSidebar.textContent = state.sidebarVisible ? '◀' : '▶';
+        });
+        clearChat.addEventListener('click', clearMessages);
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') { e.preventDefault(); clearMessages(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); toggleSidebar.click(); }
+        });
+
+        // INIT APP
+        renderGuides();
+        addMessage(`Willkommen beim **ProduktionsAssistent AI**! 🏭\n\nIch verstehe jetzt natürliche Sprache.\n\n**Versuch mal:**\n• "Wen muss ich beim Unfall anrufen?" (Sucht im Inhalt)\n• "Wie viel Grad darf das Öl haben?"\n• "Starte die CNC Wartung"`, false);
+    </script>
+</body>
+</html>
